@@ -1,23 +1,23 @@
 import numpy as np
-import random
 
 def encrypt_message(message, key_matrix):
     message_vector = np.array([ord(char) for char in message])
-    encrypted_vector = np.dot(key_matrix, message_vector)
+    eigenvalues, eigenvectors = np.linalg.eig(key_matrix)
+    diagonalized_key_matrix = np.dot(np.dot(eigenvectors, np.diag(eigenvalues)), np.linalg.inv(eigenvectors))
+    encrypted_vector = np.dot(diagonalized_key_matrix, message_vector)
     return encrypted_vector
 
 def decrypt_message(encrypted_vector, key_matrix):
     key_matrix_inv = np.linalg.inv(key_matrix)
     decrypted_vector = np.dot(key_matrix_inv, encrypted_vector)
     decrypted_message = ''.join([
-        chr(int(np.round(num))) for num in decrypted_vector
-        if 0 <= int(np.round(num)) < 0x110000
+        chr(int(np.round(num.real))) for num in decrypted_vector
+        if 0 <= int(np.round(num.real)) < 0x110000
     ])
     return decrypted_message
 
-words = ["Hello, World!", "Python", "Encryption", "Random", "Message", "Test", "Example"]
-
-original_message = random.choice(words)
+# Asking user for input message
+original_message = input("Enter a message: ")
 key_matrix_size = len(original_message)
 key_matrix = np.random.randint(1, 10, (key_matrix_size, key_matrix_size))
 
